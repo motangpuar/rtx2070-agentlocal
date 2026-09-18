@@ -1,0 +1,28 @@
+services:
+  llama-server:
+    # MUST be server-cuda, not server
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    container_name: llama-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./models:/models:Z
+    # This is the GPU passthrough — required
+    devices:
+      - nvidia.com/gpu=all
+    # Required on Fedora for SELinux
+    security_opt:
+      - label=disable
+    command: >
+      --model /models/gpt-oss-20b-Q5_K_M.gguf
+      --host 0.0.0.0
+      --port 8080
+      --ctx-size 32768
+      --cache-type-k q4_0
+      --cache-type-v q4_0
+      --flash-attn on
+      --threads 8
+      --parallel 1
+      --jinja
+      --load-mode none
